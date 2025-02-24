@@ -83,7 +83,7 @@ function AdminPanel() {
             p: isMobile ? 2 : 3,
             mb: 3,
             borderRadius: 3,
-            background: "linear-gradient(135deg, #f8f9fa, #e9ecef)",
+            background: "linear-gradient(135deg,rgb(0, 111, 221),rgb(0, 127, 253))",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
             textAlign: "center",
           }}
@@ -93,7 +93,7 @@ function AdminPanel() {
             component="h1"
             gutterBottom
           >
-            🛠️ Admin Panel
+            Admin Panel111
           </Typography>
 
           {/* Tabs Section */}
@@ -106,7 +106,7 @@ function AdminPanel() {
             centered={!isMobile}
             sx={{
               "& .MuiTabs-indicator": {
-                backgroundColor: "#6C63FF",
+                backgroundColor: "rgb(179,156,150)",
               },
               "& .MuiTab-root": {
                 fontSize: isMobile ? "0.75rem" : "1rem", // Adjust font size

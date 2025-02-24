@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -10,26 +7,21 @@ import {
   Container,
   Paper,
   Alert,
-  Slide,
-  useTheme,
-  useMediaQuery,
   CircularProgress,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Create custom dark theme
+// Create custom dark theme with new color scheme
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#3b82f6",
-      light: "#60a5fa",
-      dark: "#2563eb",
+      main: "#ff4081", // Pink color for primary elements
     },
     background: {
-      default: "#1a1a1a",
-      paper: "#2a2a2a",
+      default: "#121212", // Dark background color
+      paper: "#1f1f1f", // Darker paper color
     },
   },
   breakpoints: {
@@ -48,7 +40,11 @@ const darkTheme = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             "&:hover fieldset": {
-              borderColor: "#3b82f6",
+              borderColor: "#ff4081", // New border color on hover
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "#ff4081", // New focused border color
+              boxShadow: "0 0 15px rgba(255, 64, 129, 0.6)", // Glowing effect on focus
             },
           },
         },
@@ -60,20 +56,34 @@ const darkTheme = createTheme({
           textTransform: "none",
           fontSize: "1rem",
           padding: "0.875rem 1.5rem",
+          position: "relative",
+          borderRadius: "8px",
+          background: "linear-gradient(45deg, #ff4081, #f50057)", // Gradient background for the button
           "&:hover": {
-            transform: "scale(1.02)",
-            transition: "transform 0.2s ease",
+            transform: "scale(1.05)",
+            boxShadow: "0 0 20px rgba(255, 64, 129, 0.8)", // Glowing effect on hover
           },
           "&:active": {
             transform: "scale(0.98)",
+            boxShadow: "0 0 20px rgba(255, 64, 129, 1)", // More intense glow on click
+          },
+          "&:after": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            border: "3px solid #ff4081", // Glowing border on button
+            borderRadius: "8px",
+            zIndex: -1,
+            animation: "glowBorder 1.5s infinite alternate", // Animation for glowing border
           },
         },
       },
     },
   },
 });
-
-  
 
 const LeadCaptureForm = () => {
   const [formData, setFormData] = useState({
@@ -84,37 +94,12 @@ const LeadCaptureForm = () => {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [formHeight, setFormHeight] = useState("auto");
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Validation patterns
   const patterns = {
     name: /^[a-zA-Z\s]{2,50}$/,
     phone: /^[6-9]\d{9}$/,
   };
-
-    const titleStyles = {
-      fontSize: {
-        xs: "1.5rem",
-        sm: "1.75rem",
-        md: "2rem",
-        lg: "2.25rem",
-        xl: "2.5rem",
-        xxl: "3rem",
-      },
-      fontWeight: 700,
-      textAlign: "center",
-      marginBottom: {
-        xs: "1.5rem",
-        sm: "2rem",
-        md: "2.5rem",
-      },
-      background: "linear-gradient(45deg,rgb(174, 70, 184),rgb(165, 23, 165))",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-    }
 
   // Error messages
   const errorMessages = {
@@ -190,18 +175,23 @@ const LeadCaptureForm = () => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
+    background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", // New gradient background
     padding: "2rem",
   };
 
   return (
     <ThemeProvider theme={darkTheme}>
       <Container maxWidth={false} disableGutters sx={containerStyles}>
-        <Paper
-          elevation={8}
-          sx={{ padding: "2rem", maxWidth: "480px", width: "100%" }}
-        >
-          <Typography variant="h1" sx={titleStyles}>
+        <Paper elevation={8} sx={{ padding: "2rem", maxWidth: "480px", width: "100%" }}>
+          <Typography variant="h1" sx={{
+            fontSize: "2.5rem",
+            fontWeight: 700,
+            textAlign: "center",
+            marginBottom: "2.5rem",
+            background: "linear-gradient(45deg, #ff4081, #f50057)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}>
             Get 15% Off Your First Order
           </Typography>
           <AnimatePresence>
@@ -230,14 +220,20 @@ const LeadCaptureForm = () => {
                     helperText={touched.phone && errors.phone}
                     fullWidth
                   />
-                  {errors.submit && (
-                    <Alert severity="error">{errors.submit}</Alert>
-                  )}
+                  {errors.submit && <Alert severity="error">{errors.submit}</Alert>}
                   <Button
                     type="submit"
                     variant="contained"
                     color="primary"
                     disabled={isSubmitting}
+                    sx={{
+                      position: "relative",
+                      overflow: "hidden",
+                      "&:hover": {
+                        boxShadow: "0 0 20px rgba(255, 64, 129, 0.7)",
+                        transform: "scale(1.05)",
+                      },
+                    }}
                   >
                     {isSubmitting ? (
                       <CircularProgress size={24} />

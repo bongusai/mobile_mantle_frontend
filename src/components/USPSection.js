@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 
 const uspItems = [
   {
-    icon: <Favorite sx={{ fontSize: 48, color: "secondary.main" }} />,
+    icon: <Favorite sx={{ fontSize: 48, color: "red" }} />,
     title: "Eco-Friendly",
     description: "Sustainable materials for a greener future",
   },
@@ -19,7 +19,7 @@ const uspItems = [
     description: "On all orders over ₹50",
   },
   {
-    icon: <Brush sx={{ fontSize: 48, color: "secondary.main" }} />,
+    icon: <Brush sx={{ fontSize: 48, color: "red" }} />,
     title: "Customizable",
     description: "Design your perfect cover",
   },

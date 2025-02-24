@@ -7,30 +7,30 @@ import "bootstrap/dist/css/bootstrap.min.css" // Ensure Bootstrap's CSS is inclu
 const reviews = [
   {
     id: 1,
-    name: "Kusuma Shetty",
-    rating: 5,
-    comment: "Sleek design and unbeatable protection!",
-    avatar: "https://i.pravatar.cc/150?img=1",
+    name: "Sara Williams",
+    rating: 4,
+    comment: "Love the design! It fits perfectly and feels premium.",
+    avatar: "https://i.pravatar.cc/150?img=4",
   },
   {
     id: 2,
-    name: "Pranavi Gupta.",
-    rating: 5,
-    comment: "The customization options are amazing!",
-    avatar: "https://i.pravatar.cc/150?img=2",
+    name: "John Doe",
+    rating: 4,
+    comment: "Fantastic experience, the quality exceeded my expectations.",
+    avatar: "https://i.pravatar.cc/150?img=5",
   },
   {
     id: 3,
-    name: "Kamal Roy.",
+    name: "Emily Clark",
     rating: 5,
-    comment: "Premium quality at a great price.",
-    avatar: "https://i.pravatar.cc/150?img=3",
+    comment: "Absolutely amazing! Great value for the money.",
+    avatar: "https://i.pravatar.cc/150?img=6",
   },
 ]
 
 function CustomerReviews() {
   return (
-    <Box sx={{ py: 12, bgcolor: "background.paper" }}>
+    <Box sx={{ py: 12, bgcolor: "rgb(179,156,150)" }}> {/* Light blue background */}
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -38,20 +38,58 @@ function CustomerReviews() {
           gutterBottom
           textAlign="center"
           sx={{
-            color: "primary.main",
+            color: "#00796b", // Teal color for heading
             mb: 8,
             fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" },
             fontWeight: "bold",
           }}
         >
-          Customer Experiences
+          What Our Customers Say
         </Typography>
         <Carousel
           indicators={true}
           interval={5000}
           controls={true}
-          nextIcon={<span aria-hidden="true" className="carousel-control-next-icon" />}
-          prevIcon={<span aria-hidden="true" className="carousel-control-prev-icon" />}
+          nextIcon={
+            <span
+              aria-hidden="true"
+              className="carousel-control-next-icon"
+              style={{
+                borderRadius: "50%",
+                backgroundColor: "#00796b",
+                padding: "10px",
+                cursor: "pointer",
+                transition: "0.3s",
+              }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#004d40")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#00796b")}
+              onClick={(e) => {
+                if (e.target.style.backgroundColor === "#004d40") {
+                  e.target.style.boxShadow = "0 0 10px rgba(0, 255, 255, 0.7)";
+                }
+              }}
+            />
+          }
+          prevIcon={
+            <span
+              aria-hidden="true"
+              className="carousel-control-prev-icon"
+              style={{
+                borderRadius: "50%",
+                backgroundColor: "#00796b",
+                padding: "10px",
+                cursor: "pointer",
+                transition: "0.3s",
+              }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#004d40")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#00796b")}
+              onClick={(e) => {
+                if (e.target.style.backgroundColor === "rgb(179,156,150)") {
+                  e.target.style.boxShadow = "0 0 10px rgb(179,156,150)";
+                }
+              }}
+            />
+          }
           slide={true}
           fade={true}
         >
@@ -68,20 +106,20 @@ function CustomerReviews() {
                   alt={review.name}
                   src={review.avatar}
                   sx={{
-                    width: { xs: 120, sm: 150, md: 180 },
-                    height: { xs: 120, sm: 150, md: 180 },
+                    width: { xs: 100, sm: 120, md: 150 },
+                    height: { xs: 100, sm: 120, md: 150 },
                     margin: "0 auto",
-                    mb: 4,
-                    border: "4px solid",
-                    borderColor: "primary.main",
+                    mb: 3,
+                    border: "4px solid #00796b", // Teal border for image
+                    boxShadow: "0 0 15px rgba(0, 0, 0, 0.1)",
                   }}
                 />
                 <Typography
                   variant="h4"
                   component="div"
                   sx={{
-                    color: "text.primary",
-                    fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
+                    color: "#004d40", // Dark teal for name
+                    fontSize: { xs: "1.4rem", sm: "1.8rem", md: "2.2rem" },
                     fontWeight: "bold",
                     mb: 2,
                   }}
@@ -93,7 +131,8 @@ function CustomerReviews() {
                   readOnly
                   sx={{
                     my: 3,
-                    fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.5rem" },
+                    fontSize: { xs: "1.5rem", sm: "2rem", md: "2.2rem" },
+                    color: "#ff9800", // Orange color for stars
                   }}
                 />
                 <Typography
@@ -101,10 +140,10 @@ function CustomerReviews() {
                   sx={{
                     mt: 3,
                     mb: 5,
-                    color: "text.secondary",
-                    fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
+                    color: "#616161", // Grey color for comment text
+                    fontSize: { xs: "1.1rem", sm: "1.4rem", md: "1.6rem" },
                     fontStyle: "italic",
-                    maxWidth: "80%",
+                    maxWidth: "85%",
                     margin: "0 auto",
                   }}
                 >
@@ -120,4 +159,3 @@ function CustomerReviews() {
 }
 
 export default CustomerReviews
-

@@ -1,4 +1,5 @@
-import React from "react";
+// src/components/Signup.js
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -12,6 +13,8 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Visibility,
@@ -23,7 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import AuthLayout from "./AuthLayout";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const schema = yup.object().shape({
   name: yup
@@ -41,14 +44,14 @@ const schema = yup.object().shape({
       if (!domain) return false;
 
       const domainParts = domain.split(".");
-      if (domainParts.length < 2) return false; // Ensure both domain and TLD are present
+      if (domainParts.length < 2) return false;
 
       const topLevelDomain = domainParts[domainParts.length - 1];
       return (
         !domain.startsWith("example.") &&
         !domain.endsWith(".test") &&
-        /^[a-zA-Z.-]+$/.test(domain) && // Allow alphanumeric, dots, and hyphens in domain
-        topLevelDomain.length >= 2 // Ensure the TLD is at least 2 characters long
+        /^[a-zA-Z.-]+$/.test(domain) &&
+        topLevelDomain.length >= 2
       );
     }),
   password: yup
@@ -65,31 +68,53 @@ const schema = yup.object().shape({
     .required("Confirm Password is required"),
 });
 
-export default function Signup() {
+const Signup = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
+    mode: "onChange",
   });
 
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const onSubmit = async (data) => {
     try {
-      const userData = { email: data.email, name: data.name };
-      await login(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      navigate("/");
-    } catch (error) {
-      console.error("Signup failed:", error);
+      setIsLoading(true);
+      setError("");
+
+      const userData = {
+        name: data.name.trim(),
+        email: data.email.toLowerCase(),
+        password: data.password,
+      };
+
+      await signup(userData);
+
+      setSuccess(true);
+      reset();
+
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (err) {
+      setError(err.message || "An error occurred during signup");
+      console.error("Signup error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,181 +127,259 @@ export default function Signup() {
     },
   };
 
+  const alertAnimation = {
+    initial: { opacity: 0, y: -20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+  };
+
   return (
     <AuthLayout>
-      <motion.div initial="hidden" animate="visible" variants={formAnimation}>
-        <Typography component="h1" variant="h4" gutterBottom align="center">
-          Sign Up
-        </Typography>
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          sx={{
-            mt: 1,
-            width: "100%",
-            maxWidth: "400px",
-            mx: "auto",
-          }}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={formAnimation}
+        className="w-full max-w-md mx-auto"
+      >
+        <Typography
+          component="h1"
+          variant="h4"
+          gutterBottom
+          align="center"
+          style={{ fontStyle: "italic", fontWeight: "bold" }}
         >
-          <Controller
-            name="name"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <TextField
-                {...field}
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Full Name"
-                autoComplete="name"
-                autoFocus
-                error={!!errors.name}
-                helperText={errors.name?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-          />
-          <Controller
-            name="email"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <TextField
-                {...field}
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                autoComplete="email"
-                error={!!errors.email}
-                helperText={errors.email?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-          />
-          <Controller
-            name="password"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <TextField
-                {...field}
-                margin="normal"
-                required
-                fullWidth
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                id="password"
-                autoComplete="new-password"
-                error={!!errors.password}
-                helperText={errors.password?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-          />
-          <Controller
-            name="confirmPassword"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <TextField
-                {...field}
-                margin="normal"
-                required
-                fullWidth
-                label="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle confirm password visibility"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        edge="end"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{
-              mt: 3,
-              mb: 2,
-              height: 56,
-              borderRadius: 2,
-              fontSize: "1rem",
-              textTransform: "none",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              },
-            }}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Signing up..." : "Sign Up"}
-          </Button>
-          <Box sx={{ textAlign: "center", mt: 2 }}>
-            <Link href="/login" variant="body2">
-              Already have an account? Log In
-            </Link>
-          </Box>
-        </Box>
+          Create Account
+        </Typography>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div {...alertAnimation}>
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            </motion.div>
+          )}
+
+          {success && (
+            <motion.div {...alertAnimation}>
+              <Alert severity="success" sx={{ mb: 2 }}>
+                Account created successfully! Redirecting...
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <Box
+  component="form"
+  onSubmit={handleSubmit(onSubmit)}
+  noValidate
+  sx={{
+    mt: 1,
+    width: "100%",
+    "& .MuiTextField-root": {
+      mb: 2,
+      "& label": { color: "white" },
+      "& label.Mui-focused": { color: "white" },
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": { borderColor: "white" },
+        "&:hover fieldset": { borderColor: "white" },
+        "&.Mui-focused fieldset": { borderColor: "white" },
+        "& input": { color: "white" },
+      },
+    },
+  }}
+>
+  <Controller
+    name="name"
+    control={control}
+    defaultValue=""
+    render={({ field }) => (
+      <TextField
+        {...field}
+        required
+        fullWidth
+        id="name"
+        label="Full Name"
+        autoComplete="name"
+        autoFocus
+        error={!!errors.name}
+        helperText={errors.name?.message}
+        disabled={isLoading}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Person sx={{ color: "white" }} />
+            </InputAdornment>
+          ),
+        }}
+      />
+    )}
+  />
+
+  <Controller
+    name="email"
+    control={control}
+    defaultValue=""
+    render={({ field }) => (
+      <TextField style={{ color: "white" }}
+        {...field}
+        required
+        fullWidth
+        id="email"
+        label="Email Address"
+        autoComplete="email"
+        error={!!errors.email}
+        helperText={errors.email?.message}
+        disabled={isLoading}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Email sx={{ color: "white" }} />
+            </InputAdornment>
+          ),
+        }}
+      />
+    )}
+  />
+
+  <Controller
+    name="password"
+    control={control}
+    defaultValue=""
+    render={({ field }) => (
+      <TextField
+        {...field}
+        required
+        fullWidth
+        label="Password"
+        type={showPassword ? "text" : "password"}
+        id="password"
+        autoComplete="new-password"
+        error={!!errors.password}
+        helperText={errors.password?.message}
+        disabled={isLoading}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Lock sx={{ color: "white" }} />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => setShowPassword(!showPassword)}
+                edge="end"
+                disabled={isLoading}
+              >
+                {showPassword ? <VisibilityOff sx={{ color: "white" }} /> : <Visibility sx={{ color: "white" }} />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+    )}
+  />
+
+  <Controller
+    name="confirmPassword"
+    control={control}
+    defaultValue=""
+    render={({ field }) => (
+      <TextField
+        {...field}
+        required
+        fullWidth
+        label="Confirm Password"
+        type={showConfirmPassword ? "text" : "password"}
+        id="confirmPassword"
+        error={!!errors.confirmPassword}
+        helperText={errors.confirmPassword?.message}
+        disabled={isLoading}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Lock sx={{ color: "white" }} />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle confirm password visibility"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                edge="end"
+                disabled={isLoading}
+              >
+                {showConfirmPassword ? (
+                  <VisibilityOff sx={{ color: "white" }} />
+                ) : (
+                  <Visibility sx={{ color: "white" }} />
+                )}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+    )}
+  />
+
+  <Button
+    type="submit"
+    fullWidth
+    variant="contained"
+    disabled={isLoading}
+    sx={{
+      mt: 3,
+      mb: 2,
+      height: 56,
+      borderRadius: 2,
+      fontSize: "1rem",
+      textTransform: "none",
+      transition: "all 0.3s ease",
+      position: "relative",
+      backgroundColor: "white",
+      color: "black",
+      "&:hover": {
+        backgroundColor: "white",
+        transform: "translateY(-2px)",
+        boxShadow: "0 4px 8px rgba(255, 255, 255, 0.2)",
+      },
+    }}
+  >
+    {isLoading ? <CircularProgress size={24} color="inherit" /> : "Create Account"}
+  </Button>
+
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: isMobile ? "column" : "row",
+      gap: 1,
+      mt: 2,
+    }}
+  >
+    <Typography variant="body2" sx={{ color: "white" }}>
+      Already have an account?
+    </Typography>
+    <Link
+      href="/login"
+      variant="body2"
+      sx={{
+        color: "white",
+        textDecoration: "none",
+        "&:hover": {
+          textDecoration: "underline",
+        },
+      }}
+    >
+      Log in here
+    </Link>
+  </Box>
+</Box>
+
       </motion.div>
     </AuthLayout>
   );
-}
+};
+
+export default Signup;
